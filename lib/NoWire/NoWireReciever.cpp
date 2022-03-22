@@ -120,6 +120,14 @@ int8_t NoWireReciever::__getBit(){
     bitBuffer[0] = bitBuffer[1];
     bitBuffer[1] = bit;
 
+
+    //  [-1 , # ] return -1, -> [ - , # ]
+
+    //  [ 0 , 0 ] return  0, -> [ - , - ]
+    //  [ 0 , # ] return  0, -> [ - , # ]
+
+    //  [ 1 , 1 ] return  1, -> [ - , - ]
+    //  [ 1 , # ] return  1, -> [ - , # ]
     if(bitBuffer[0] == -1){
         return -1;
     }
