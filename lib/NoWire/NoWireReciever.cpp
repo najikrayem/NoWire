@@ -162,7 +162,7 @@ uint32_t NoWireReciever::recieveFourBytes(){
             ++i;
             packetBitsBuffer = (packetBitsBuffer<<1) | bit;
             if(__checkPacketSyntaxAndCRC(packetBitsBuffer)){
-                __sampleRecieverPeriodically(SAMPLE_FREQ);
+                __sampleRecieverPeriodically(0);
                 uint32_t returnVal = (uint32_t)(packetBitsBuffer >> 28);
                 packetBitsBuffer = 0;
                 return returnVal;
