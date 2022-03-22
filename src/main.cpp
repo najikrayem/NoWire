@@ -9,14 +9,12 @@ void printParams(){
 	Serial.print("Expected bit rate: ");Serial.println(1000000 / MODULATION_PERIOD);
 };
 
-#define TransmitterCode 0
+#define TransmitterCode 1
 
 #if TransmitterCode
 
 #include <Arduino.h>
 #include <NoWireTransmitter.h>
-
-
 
 void setup() {
 	Serial.begin(115200);
@@ -31,7 +29,7 @@ void loop() {
 	i++;
 }
 
-#else
+#else	//receiver code
 
 #include <Arduino.h>
 #include <NoWireReciever.h>
