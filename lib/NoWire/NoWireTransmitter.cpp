@@ -1,51 +1,47 @@
 #include <NoWireTransmitter.h>
 #include <NoWireShared.h>
+#include <NoWireConfig.h>
 
 NoWireTransmitter::NoWireTransmitter():
-pin(DEFAULT_TX_PIN)
-{
-}
-
-uint8_t x = 0;
+__pin_irs(DEFAULT_TX_PIN)
+{}
 
 void NoWireTransmitter::attachToPin(uint8_t newPin){
     pinMode(newPin, OUTPUT);
-    pin = newPin;
+    CLR_GIB;
+    __pin_irs = newPin;
+    RSTR_GIB;
 }
 
 uint8_t NoWireTransmitter::getPin(){
+    uint8_t pin;
+    CLR_GIB;
+    pin = __pin_irs;
+    RSTR_GIB;
     return pin;
 }
 
-void NoWireTransmitter::__produceFrequency_blocking(uint32_t hertz, uint64_t DurationNanoSecs){
-    //TODO
-    while(true);
-}
-
-IntervalTimer __waveTimer;
+static IntervalTimer __waveTimer;
 void __produceFrequency_nonblocking_helper(){
-    digitalToggleFast(NoWireTx.getPin());
+    digitalToggleFast(NoWireTx.__pin_irs);
 };
 bool NoWireTransmitter::__produceFrequency_nonblocking(uint32_t hertz){
     static uint32_t cachedHertz = 0;
     static double togglePeriod = 0;
 
     if (hertz == 0){
-        digitalWriteFast(NoWireTx.getPin(), 0);
+        digitalWriteFast(NoWireTx.__pin_irs, 0);
         __waveTimer.end();
         return true;
     }
 
     if(cachedHertz != hertz){
-        togglePeriod = ((double)1000000/(double)hertz)/(double)2;//in micro seconds
+        togglePeriod = (1000000.0/hertz)/2.0;//in micro seconds
         cachedHertz = hertz;
+        return __waveTimer.begin(__produceFrequency_nonblocking_helper,togglePeriod);
     }
 
-    #if 0
-        Serial.print("TogglePeriod: ");Serial.println(togglePeriod);
-    #endif
-
-    return __waveTimer.begin(__produceFrequency_nonblocking_helper,togglePeriod);
+    return true;
 }
 
 void NoWireTransmitter::__sendBits(uint64_t bits){
@@ -61,7 +57,6 @@ void NoWireTransmitter::__sendBits(uint64_t bits){
         delayMicroseconds(MODULATION_PERIOD);
         bits = bits << 1;
     }
-    
     __produceFrequency_nonblocking(0);
 }
 
@@ -71,10 +66,6 @@ void NoWireTransmitter::sendFourBytes(uint32_t bytes){
     packetBits = (packetBits | (((uint64_t)bytes) << 28));
     packetBits = (packetBits | (((uint64_t)__CRC24(bytes)) << 4));
     packetBits = (packetBits | ((uint64_t)EOT));
-
-    #if 0
-        Serial.print("packetBits :");Serial.println(packetBits, BIN);
-    #endif
 
     __sendBits(packetBits);
 }

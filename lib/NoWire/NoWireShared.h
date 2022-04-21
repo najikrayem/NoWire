@@ -3,6 +3,20 @@
 
 #include<Arduino.h>
 
+inline bool disableInterrupts() {
+                uint32_t primask;
+                __asm__ volatile("mrs %0, primask\n" : "=r" (primask)::);
+                __disable_irq();
+                return (primask == 0) ? true : false;
+}
+
+inline void enableInterrupts(bool doit) {
+                if (doit) __enable_irq();
+}
+
+#define CLR_GIB bool sreg_backup=disableInterrupts()       //clear global interrupt bit
+#define RSTR_GIB enableInterrupts(sreg_backup)                 //restore interrupt bit
+
 
 uint32_t __CRC24(uint32_t data){
     //CRC: HD=9, CRC=24, LEN=32 (max 39), polynomial = 0xed93bb
@@ -23,7 +37,5 @@ uint32_t __CRC24(uint32_t data){
 
     return (data >> 8);
 }
-
-
 
 #endif

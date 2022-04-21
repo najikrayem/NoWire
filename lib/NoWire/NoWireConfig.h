@@ -17,7 +17,9 @@
 
 #define MODULATION_PERIOD 100000   //microseconds
 
-
+//Special Chars
+#define SOH 0x0F
+#define EOT 0x00
 
 /*
 
@@ -36,10 +38,6 @@
 #define RX_SAMPLE_ARRAY_LENGTH ((unsigned long int)(((double)SAMPLE_FREQ/1000.0d) * ((double)MODULATION_PERIOD / (2.0d * 1000.0d))))
 
 */
-
-//Special Chars
-#define SOH 0x0F
-#define EOT 0x00
 
 
 #endif
